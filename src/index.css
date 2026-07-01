@@ -1,1 +1,48 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+body {
+    margin: 0;
+}
+
+.pokedex-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pokedex-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pokedex-scroll::-webkit-scrollbar-thumb {
+  background: rgba(150,255,150,.4);
+  border-radius:999px;
+}
+
+.pokedex-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(150,255,150,.8);
+}
+
+@keyframes pokedex-light {
+  0%, 100% {
+    filter: brightness(0.7);
+  }
+
+  20% {
+    filter: brightness(1.5);
+  }
+
+  35% {
+    filter: brightness(20);
+  }
+
+  50% {
+    filter: brightness(1.5);
+  }
+
+  75% {
+    filter: brightness(0.7);
+  }
+}
+
+.animate-pokedex-light {
+  animation: pokedex-light 1.5s infinite ease-in-out;
+}
