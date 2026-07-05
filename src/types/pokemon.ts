@@ -1,4 +1,4 @@
-export interface Pokemon {
+export interface Pokemon{
     id: number;
     name: string;
     height: number;
@@ -43,4 +43,23 @@ export interface PokemonStat {
 export interface Evolution {
     name: string;
     url: string;
+    details: EvolutionDetail[];
+}
+
+export interface EvolutionDetail {
+    trigger: {
+        name: string;
+    };
+
+    min_level: number | null;
+
+    item: {
+        name: string;
+        url: string;
+    } | null;
+}
+
+export interface TypeInfo {
+    name: string;
+    image: string;
 }

@@ -1,18 +1,11 @@
 import pokeball from "../assets/pokeball.svg"
 import { usePokemon } from "../hooks/usePokemon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import PokemonAI from "./pokemonAI";
+import { getPokemonList } from "../services/pokemonList";
 
-
-type Pokemon = {
-  id: number;
-  name: string;
-  image: string;
-  type: string;
-  status: string;
-}
-
-
-type StatsProps = {label: string 
+type StatsProps = {
+  label: string
   value: number
 }
 
@@ -28,22 +21,51 @@ function Stats({ label, value }: StatsProps) {
 const dpadButton = "w-8 h-8 bg-gray-600 border-2 border-gray-900 rounded text-amber-50 relative items-center justify-center flex font-mono brightness-90 shadow-[0_1px_0_rgb(24,24,27)] transition-al lduration-100 ease-out hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_7px_0_rgb(24,24,27)] active:translate-y-1 active:scale-95 active:brightness-90 active:shadow-[0_1px_0_rgb(24,24,27)] cursor-pointer select-none"
 
 export function Pokedex() {
+
+  const [search, setSearch] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [pokemonList, setPokemonList] = useState<
+    { name: string; url: string }[]
+  >([]);
   const [isShaking, setIsShaking] = useState(false);
-  const {pokemon, pokemonId, nextPokemon, prevPokemon, changeSprite, image, displayName, changeForm, stats, pokemonTypes, vantagens, fraquezas, description, namePT, evolutions } = usePokemon() as {
-    pokemon: Pokemon | null;
-    nextPokemon: () => void;
-    prevPokemon: () => void;
-  };
+  const { pokemon, pokemonId, nextPokemon, prevPokemon, changeSprite, image, displayName, changeForm, stats, pokemonTypes, vantagens, fraquezas, description, evolutions, searchPokemon } = usePokemon()
 
-function animateChange(action: () => void) {
-  setIsShaking(true);
+  useEffect(() => {
+    async function loadPokemonList() {
+      const data = await getPokemonList();
 
-  action();
+      setPokemonList(data.results);
+    }
 
-  setTimeout(() => {
-    setIsShaking(false);
-  }, 400);
-}
+    loadPokemonList();
+  }, []);
+
+  function animateChange(action: () => void) {
+    setIsShaking(true);
+
+    action();
+
+    setTimeout(() => {
+      setIsShaking(false);
+    }, 400);
+  }
+
+  function handleSearch(value: string) {
+    setSearch(value);
+
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const filtered = pokemonList
+      .filter((pokemon) =>
+        pokemon.name.toLowerCase().startsWith(value.toLowerCase())
+      )
+      .slice(0, 8);
+
+    setSuggestions(filtered.map((pokemon) => pokemon.name));
+  }
 
 
   return (
@@ -51,10 +73,8 @@ function animateChange(action: () => void) {
     <div className="flex justify-center p-2 sm:p-4">
       <div className="flex flex-col xl:flex-row rounded-xl shadow-2xl overflow-hidden w-full max-w-225">
 
-        {/* Lado esquerdo */}
         <section className="w-full xl:w-105 bg-red-600 p-4 sm:p-6 xl:border-r-8 border-b-8 xl:border-b-0 border-red-800">
 
-          {/* Luz */}
           <div className="flex items-center gap-2 mb-6">
             <div className="w-16 h-16 rounded-full bg-cyan-500 border-4 border-white animate-pokedex-light" />
 
@@ -64,20 +84,18 @@ function animateChange(action: () => void) {
               <div className="w-5 h-5 rounded-full bg-green-400" />
             </div>
           </div>
-
-          {/* Tela */}
           <div className="bg-gray-200 rounded-xl p-5">
 
             <div className="bg-zinc-800/80 rounded-lg h-11 mb-8 text-zinc-100 flex items-center justify-between p-5 font-mono text-xl">
-            <p>{pokemonId}</p>
-            <h3>{displayName}</h3>
+              <p>{pokemonId}</p>
+              <h3>{displayName}</h3>
 
-          </div>
+            </div>
 
             <div className="relative flex h-56 sm:h-68 items-center justify-center rounded-lg bg-black/50 p-4">
-            <img src={pokeball} alt="Pokeball" className="absolute w-44 sm:w-56 xl:w-62 opacity-20"/>
+              <img src={pokeball} alt="Pokeball" className="absolute w-44 sm:w-56 xl:w-62 opacity-20" />
 
-            <img src={image} alt={pokemon?.name} className={`relative z-10 w-52 sm:w-60 xl:w-70 ${isShaking ? "animate-shake" : ""}`}/>
+              <img src={image} alt={pokemon?.name} className={`relative z-10 w-52 sm:w-60 xl:w-70 ${isShaking ? "animate-shake" : ""}`} />
 
             </div>
 
@@ -85,16 +103,16 @@ function animateChange(action: () => void) {
 
               <div className="w-5 h-5 rounded-full bg-red-600" />
 
-            <div className="z-20 flex gap-1 w-auto rounded-lg">
-              {pokemonTypes.map((type) => (
-                <img
-                  key={type.name}
-                  src={type.image}
-                  alt={type.name}
-                  className="h-10 drop-shadow-lg"
-                />
-              ))}
-            </div>
+              <div className="z-20 flex gap-1 w-auto rounded-lg">
+                {pokemonTypes.map((type) => (
+                  <img
+                    key={type.name}
+                    src={type.image}
+                    alt={type.name}
+                    className="h-10 drop-shadow-lg"
+                  />
+                ))}
+              </div>
               <div className="space-y-1">
                 <div className="w-10 h-1 bg-gray-600 rounded" />
                 <div className="w-10 h-1 bg-gray-600 rounded" />
@@ -105,11 +123,38 @@ function animateChange(action: () => void) {
 
           </div>
 
-          {/* Controles */}
+          <div className="relative mt-6 flex justify-between items-center">
+            <div className="relative">
+              <input
+                className="w-full rounded-xl bg-black/50 p-3 h-10 text-white placeholder-zinc-400 
+               focus:outline-none focus:ring-2 focus:ring-gray-200
+               sm:p-3.5 sm:h-11 md:h-12"
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder="Pesquisar Pokémon..."
+              />
 
-          <div className="mt-6 flex justify-between items-center">
+              {suggestions.length > 0 && (
+                <div className="absolute left-0 right-0 mt-1 z-50 rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl overflow-hidden">
+                  {suggestions.slice(0, 3).map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      className="block w-full px-4 py-3 text-left text-white hover:bg-zinc-800 transition-colors 
+                               first:rounded-t-xl last:rounded-b-xl"
+                      onClick={() => {
+                        searchPokemon(name);
+                        setSearch("");
+                        setSuggestions([]);
+                      }}
+                    >
+                      {name.charAt(0).toUpperCase() + name.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <button className="w-10 h-10 rounded-full bg-black cursor-pointer"></button>
 
             <div className="grid grid-cols-3">
 
@@ -135,33 +180,33 @@ function animateChange(action: () => void) {
 
           <div className="pokedex-scroll mt-5 bg-green-800/80 overflow-y-auto rounded-md h-35 border-gray-200 border-4 flex font-bold p-2">
 
-          <div className="text-xs sm:text-sm font-bold space-y-4 text-white">
+            <div className="text-xs sm:text-sm font-bold space-y-4 text-white">
 
-            <div>
-              <span>Descrição:</span>
-              <p className="mt-1 font-normal">
-                {description}
-              </p>
-            </div>
+              <div>
+                <span>Descrição:</span>
+                <p className="mt-1 font-normal">
+                  {description}
+                </p>
+              </div>
 
-            <div>
-              <span>Evolução:</span>
+              <div>
+                <span>Evolução:</span>
 
-              <div className="mt-2 flex flex-wrap">
-                {evolutions.map((evolution, index) => (
-                  <div key={evolution.name} className="flex items-center">
-                    <div className="rounded-md px-3 py-1">
-                      {evolution.name.charAt(0).toUpperCase() + evolution.name.slice(1)}
-                    </div>
-                    {index < evolutions.length - 1 && (
-                      <span className="text-lg">→</span>)}
-                  </div>))}
-                  
+                <div className="mt-2 flex flex-wrap">
+                  {evolutions.map((evolution, index) => (
+                    <div key={evolution.name} className="flex items-center">
+                      <div className="rounded-md px-3 py-1">
+                        {evolution.name.charAt(0).toUpperCase() + evolution.name.slice(1)}
+                      </div>
+                      {index < evolutions.length - 1 && (
+                        <span className="text-lg">→</span>)}
+                    </div>))}
+
+                </div>
+
               </div>
 
             </div>
-
-          </div>
 
           </div>
 
@@ -218,27 +263,13 @@ function animateChange(action: () => void) {
               />
             ))}
           </div>
-
-        <div className="mt-10 rounded-xl bg-zinc-900/40 p-5 shadow-lg">
-
-          <h2 className="mb-4 text-lg font-bold text-white text-center">
-            Pokédex AI
-          </h2>
-
-          <div className="h-36 overflow-y-auto rounded-lg bg-green-900/70 p-3 text-sm leading-4.5 text-green-100">
-            Faça uma pergunta sobre o Pokémon. ja que estou com muita 
-          </div>
-
-          <div className="mt-4 flex flex-col sm:flex-row gap-3">
-
-            <input type="text" placeholder="Ex: Qual é a fraqueza dele?" className=" flex-1 rounded-lg border border-zinc-600 bg-white/10 px-3 py-3 text-white placeholder:text-zinc-400 outline-none transition focus:border-blue-400 focus:ring-1 focus:ring-cyan-400/"/>
-
-            <button className=" rounded-lg bg-yellow-400 px-6 font-semibold text-zinc-900 transition-all hover:bg-yellow-500 active:scale-95 w-full sm:w-auto">Enviar</button>
-
-          </div>
-
-        </div>        
-
+          <PokemonAI
+            pokemon={pokemon}
+            description={description}
+            vantagens={vantagens}
+            fraquezas={fraquezas}
+            evolutions={evolutions}
+          />
         </section>
 
       </div>

@@ -6,13 +6,12 @@ import { typeImages } from "../constants/pokemonTypes";
 import { getPokemonType } from "../services/pokemonType";
 import { getPokemonSpecies } from "../services/pokemonSpecies";
 import { getPokemonEvolution } from "../services/pokemonEvolution";
+
 export function usePokemon() {
     const [evolutions, setEvolutions] = useState<Evolution[]>([]);
-    const [description, setDescription] = useState("");
-    const [namePT, setNamePT] = useState("");
-    const [evolutionUrl, setEvolutionUrl] = useState("");    
+    const [description, setDescription] = useState("");   
     const [pokemon, setPokemon] = useState<Pokemon | null>(null);
-    const [pokemonId, setPokemonId] = useState(1);
+    const [pokemonId, setPokemonId] = useState<number>(1);
     const [forms, setForms] = useState([]);
     const [currentFormIndex, setCurrentFormIndex] = useState(0);
     const [spriteMode, setSpriteMode] = useState<"padrao" | "shiny">("padrao");
@@ -64,6 +63,30 @@ export function usePokemon() {
         setPokemonId(id => Math.max(1, id - 1));
         resetPokemonView();
     }
+
+    async function searchPokemon(name: string) {
+    const trimmedName = name.trim().toLowerCase();
+    if (!trimmedName) return;
+
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${trimmedName}`);
+        
+        if (!response.ok) {
+            alert("Pokémon não encontrado!");
+            return;
+        }
+
+        const data = await response.json();
+        
+        setPokemonId(data.id);
+        setPokemon(data);
+        
+        resetPokemonView();
+        
+    } catch (error) {
+        alert("Erro ao buscar Pokémon");
+    }
+}
 
     function changeSprite() {
         setSpriteMode(current => {
@@ -135,6 +158,7 @@ function visitNode(node: any) {
     evolutionList.push({
         name: node.species.name,
         url: node.species.url,
+        details: node.evolution_details
     });
 
     for (const evolution of node.evolves_to) {
@@ -202,7 +226,7 @@ function visitNode(node: any) {
         vantagens,
         fraquezas,
         description,
-        namePT,
         evolutions,
+        searchPokemon,
     };
 }
