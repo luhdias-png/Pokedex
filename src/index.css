@@ -46,3 +46,37 @@ body {
 .animate-pokedex-light {
   animation: pokedex-light 1.5s infinite ease-in-out;
 }
+
+@keyframes shake {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+
+  15% {
+    transform: translateX(-8px) rotate(-5deg);
+  }
+
+  30% {
+    transform: translateX(8px) rotate(5deg);
+  }
+
+  45% {
+    transform: translateX(-6px) rotate(-4deg);
+  }
+
+  60% {
+    transform: translateX(6px) rotate(4deg);
+  }
+
+  75% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out;
+}

@@ -1,27 +1,20 @@
 import pokeball from "../assets/pokeball.svg"
-import fire from "../assets/tipagem/fire.png"
-import fly from "../assets/tipagem/fly.png"
-import grass from "../assets/tipagem/grass.png";
-import steel from "../assets/tipagem/steel.png";
-import water from "../assets/tipagem/water.png";
-import ground from "../assets/tipagem/ground.png";
-import rock from "../assets/tipagem/rock.png";
+import { usePokemon } from "../hooks/usePokemon";
+import { useState } from "react";
+
+
+type Pokemon = {
+  id: number;
+  name: string;
+  image: string;
+  type: string;
+  status: string;
+}
+
 
 type StatsProps = {label: string 
   value: number
 }
-
-const strengths = [fire, grass, steel, water];
-const weaknesses = [water, ground, rock];
-
-const stats = [
-  { label: "HP", value: 35 },
-  { label: "ATK", value: 55 },
-  { label: "DEF", value: 40 },
-  { label: "SP ATK", value: 140 },
-  { label: "SP DEF", value: 140 },
-  { label: "SPD", value: 90 },
-];
 
 function Stats({ label, value }: StatsProps) {
   return (
@@ -35,7 +28,26 @@ function Stats({ label, value }: StatsProps) {
 const dpadButton = "w-8 h-8 bg-gray-600 border-2 border-gray-900 rounded text-amber-50 relative items-center justify-center flex font-mono brightness-90 shadow-[0_1px_0_rgb(24,24,27)] transition-al lduration-100 ease-out hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_7px_0_rgb(24,24,27)] active:translate-y-1 active:scale-95 active:brightness-90 active:shadow-[0_1px_0_rgb(24,24,27)] cursor-pointer select-none"
 
 export function Pokedex() {
+  const [isShaking, setIsShaking] = useState(false);
+  const {pokemon, pokemonId, nextPokemon, prevPokemon, changeSprite, image, displayName, changeForm, stats, pokemonTypes, vantagens, fraquezas, description, namePT, evolutions } = usePokemon() as {
+    pokemon: Pokemon | null;
+    nextPokemon: () => void;
+    prevPokemon: () => void;
+  };
+
+function animateChange(action: () => void) {
+  setIsShaking(true);
+
+  action();
+
+  setTimeout(() => {
+    setIsShaking(false);
+  }, 400);
+}
+
+
   return (
+
     <div className="flex justify-center p-2 sm:p-4">
       <div className="flex flex-col xl:flex-row rounded-xl shadow-2xl overflow-hidden w-full max-w-225">
 
@@ -56,15 +68,16 @@ export function Pokedex() {
           {/* Tela */}
           <div className="bg-gray-200 rounded-xl p-5">
 
-            <div className="relative flex h-56 sm:h-64 items-center justify-center rounded-lg bg-black/50 p-4">
-            <div className="absolute top-1 right-1 z-20 flex gap-0.5">
-            <img src={fire} alt="" className="h-8 drop-shadow-lg" />
-            <img src={fly} alt="" className="h-8 drop-shadow-lg" />
-            </div>
+            <div className="bg-zinc-800/80 rounded-lg h-11 mb-8 text-zinc-100 flex items-center justify-between p-5 font-mono text-xl">
+            <p>{pokemonId}</p>
+            <h3>{displayName}</h3>
+
+          </div>
+
+            <div className="relative flex h-56 sm:h-68 items-center justify-center rounded-lg bg-black/50 p-4">
             <img src={pokeball} alt="Pokeball" className="absolute w-44 sm:w-56 xl:w-62 opacity-20"/>
 
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
-                alt="Steelix" className="relative z-10 w-52 sm:w-60 xl:w-70"/>
+            <img src={image} alt={pokemon?.name} className={`relative z-10 w-52 sm:w-60 xl:w-70 ${isShaking ? "animate-shake" : ""}`}/>
 
             </div>
 
@@ -72,6 +85,16 @@ export function Pokedex() {
 
               <div className="w-5 h-5 rounded-full bg-red-600" />
 
+            <div className="z-20 flex gap-1 w-auto rounded-lg">
+              {pokemonTypes.map((type) => (
+                <img
+                  key={type.name}
+                  src={type.image}
+                  alt={type.name}
+                  className="h-10 drop-shadow-lg"
+                />
+              ))}
+            </div>
               <div className="space-y-1">
                 <div className="w-10 h-1 bg-gray-600 rounded" />
                 <div className="w-10 h-1 bg-gray-600 rounded" />
@@ -92,19 +115,19 @@ export function Pokedex() {
 
               <div />
 
-              <button className={dpadButton}>▲</button>
+              <button onClick={() => animateChange(() => changeForm("next"))} className={dpadButton}>▲</button>
 
               <div />
 
-              <button className={dpadButton}>◀</button>
+              <button onClick={prevPokemon} className={dpadButton}>◀</button>
 
-              <button className={dpadButton}>●</button>
+              <button onClick={() => animateChange(changeSprite)} className={dpadButton}>●</button>
 
-              <button className={dpadButton}>▶</button>
+              <button onClick={nextPokemon} className={dpadButton}>▶</button>
 
               <div />
 
-              <button className={dpadButton}>▼</button>
+              <button onClick={() => animateChange(() => changeForm("prev"))} className={dpadButton}>▼</button>
 
             </div>
 
@@ -112,9 +135,33 @@ export function Pokedex() {
 
           <div className="pokedex-scroll mt-5 bg-green-800/80 overflow-y-auto rounded-md h-35 border-gray-200 border-4 flex font-bold p-2">
 
-           <div className="text-xs sm:text-sm leading-5 sm:leading-6 text-zinc-200">
-            <p className="text-xs sm:text-sm font-bold">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aspernatur ea beatae error, voluptates, dolore possimus incidunt placeat vel laudantium rem harum, unde obcaecati ut neque eligendi corporis labore qui maxime!</p>
-           </div> 
+          <div className="text-xs sm:text-sm font-bold space-y-4 text-white">
+
+            <div>
+              <span>Descrição:</span>
+              <p className="mt-1 font-normal">
+                {description}
+              </p>
+            </div>
+
+            <div>
+              <span>Evolução:</span>
+
+              <div className="mt-2 flex flex-wrap">
+                {evolutions.map((evolution, index) => (
+                  <div key={evolution.name} className="flex items-center">
+                    <div className="rounded-md px-3 py-1">
+                      {evolution.name.charAt(0).toUpperCase() + evolution.name.slice(1)}
+                    </div>
+                    {index < evolutions.length - 1 && (
+                      <span className="text-lg">→</span>)}
+                  </div>))}
+                  
+              </div>
+
+            </div>
+
+          </div>
 
           </div>
 
@@ -124,12 +171,6 @@ export function Pokedex() {
 
         <section className="w-full xl:w-105 bg-red-600 p-4 sm:p-6">
 
-          <div className="bg-zinc-800/80 rounded-lg h-11 mb-8 text-zinc-100 flex items-center justify-between p-5 font-mono text-xl">
-            <p>Id: 006</p>
-            <h3>Charizard</h3>
-
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-5">
 
             <div className="bg-green-600 rounded-[10px] hover:cursor-pointer hover:bg-green-600/90">
@@ -138,10 +179,10 @@ export function Pokedex() {
               </h3>
 
               <div className="grid grid-cols-3 place-items-center p-2 gap-1">
-                {strengths.map((type, index) => (
+                {vantagens.map((type, index) => (
                   <img
                     key={index}
-                    src={type}
+                    src={type.image}
                     alt=""
                     className="h-10 w-10 transition-transform hover:scale-115"
                   />
@@ -155,10 +196,10 @@ export function Pokedex() {
               </h3>
 
               <div className="grid grid-cols-3 place-items-center p-2 gap-1">
-                {weaknesses.map((type, index) => (
+                {fraquezas.map((type, index) => (
                   <img
                     key={index}
-                    src={type}
+                    src={type.image}
                     alt=""
                     className="h-10 w-10 transition-transform hover:scale-115"
                   />
@@ -168,7 +209,7 @@ export function Pokedex() {
 
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 -m-1">
+          <div className="grid grid-cols-2 sm:grid-cols-1 gap-3 -m-1">
             {stats.map((stat) => (
               <Stats
                 key={stat.label}
