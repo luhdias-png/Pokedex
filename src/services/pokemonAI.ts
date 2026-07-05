@@ -74,8 +74,12 @@ ${question}
         });
 
         return response.text ?? "Não consegui gerar uma resposta.";
-    } catch (error) {
-        console.error(error);
-        return "Erro ao consultar a IA.";
+    } catch (error: any) {
+
+    if (error.status === 429) {
+        return "A IA atingiu o limite de uso temporariamente. Aguarde alguns instantes e tente novamente.";
+    }
+
+    return "Ocorreu um erro ao consultar a IA.";
     }
 }
