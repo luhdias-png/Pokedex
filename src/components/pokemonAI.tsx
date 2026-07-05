@@ -37,7 +37,7 @@ export default function PokemonAI({
                 fraquezas,
                 evolutions,
             });
-            setAnswer(`Sua Pergunta:\n ${response}`)
+            setAnswer(response)
             setQuestion("");
         }
 
