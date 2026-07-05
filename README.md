@@ -219,7 +219,8 @@ npm run preview
 
 - Pesquisa por nome
 - Sugestões automáticas
-- Mudança de formas
+- Mudanca de pkmn com as seta esquerda e direita
+- Mudança de formas com a setas para e baixo
 - Evoluções
 - Fraquezas
 - Vantagens
