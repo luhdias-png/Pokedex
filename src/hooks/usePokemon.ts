@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getPokemon } from "../services/pokemon";
 import { getPokemonForms } from "../services/pokemonForms";
-import type { Pokemon, Evolution, PokemonStat } from "../types/pokemon";
+import type { Pokemon, Evolution, PokemonStat, TypeInfo, PokemonForm } from "../types/pokemon";
 import { typeImages } from "../constants/pokemonTypes";
 import { getPokemonType } from "../services/pokemonType";
 import { getPokemonSpecies } from "../services/pokemonSpecies";
@@ -12,16 +12,19 @@ export function usePokemon() {
     const [description, setDescription] = useState("");   
     const [pokemon, setPokemon] = useState<Pokemon | null>(null);
     const [pokemonId, setPokemonId] = useState<number>(1);
-    const [forms, setForms] = useState([]);
+    const [forms, setForms] = useState<PokemonForm[]>([]);
     const [currentFormIndex, setCurrentFormIndex] = useState(0);
     const [spriteMode, setSpriteMode] = useState<"padrao" | "shiny">("padrao");
     const spriteModes = ["padrao", "shiny"] as const;
-    const pokemonTypes = pokemon?.types.map((type) => ({
-        name: type.type.name,
-        image: typeImages[type.type.name],
-    })) ?? [];
-    const [vantagens, setVantagens] = useState([]);
-    const [fraquezas, setFraquezas] = useState([]);
+    const pokemonTypes =
+        pokemon?.types.map((type) => ({
+            name: type.type.name,
+            image:
+                typeImages[type.type.name as keyof typeof typeImages],
+        })) ?? [];
+
+    const [vantagens, setVantagens] = useState<TypeInfo[]>([]);
+    const [fraquezas, setFraquezas] = useState<TypeInfo[]>([]);
     
     const currentForm = forms[currentFormIndex] ?? null;
     const displayName =

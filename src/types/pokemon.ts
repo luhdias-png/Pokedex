@@ -63,3 +63,15 @@ export interface TypeInfo {
     name: string;
     image: string;
 }
+
+export interface PokemonTypeInfo {
+    name: string;
+    image: string;
+}
+
+export interface PokemonForm {
+    pokemon: {
+        name: string;
+        url: string;
+    };
+}

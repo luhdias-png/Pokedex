@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { askPokemonAI } from "../services/pokemonAI";
-import type { Pokemon, Evolution, PokemonType, TypeInfo } from "../types/pokemon";
+import type { Pokemon, Evolution, TypeInfo, PokemonTypeInfo } from "../types/pokemon";
 
 type PokemonAIProps = {
     pokemon: Pokemon | null;
     description: string;
-    pokemonTypes: PokemonType[];
+    pokemonTypes: PokemonTypeInfo[];
     vantagens: TypeInfo[];
     fraquezas: TypeInfo[];
     evolutions: Evolution[];

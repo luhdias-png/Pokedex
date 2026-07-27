@@ -264,6 +264,7 @@ export function Pokedex() {
             ))}
           </div>
           <PokemonAI
+            pokemonTypes={pokemonTypes}
             pokemon={pokemon}
             description={description}
             vantagens={vantagens}
